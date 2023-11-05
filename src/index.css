@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.image-container {
+  max-width: 1000px;
+  display: flex;
+  flex-direction: row;
+  /* grid-template-columns: 20% 20% 20% 20% 20%;
+  grid-template-rows: 20% 20% 20% 20% 20%; */
+}
+
+.img {
+  max-width: 150px;
+  /* grid-column: 2 / span 3; */
+}
+
+.checkbox {
+  max-width: 20px;
+}
