@@ -1,62 +1,73 @@
 import { useState, useRef, useEffect } from 'react';
+
 import './index.css';
 
 export default function App() {
   const dragItem = useRef();
   const dragOverItem = useRef();
+
   const [gallery, setGallery] = useState([
-    { id: 0, src: 'image-1.webp' },
-    { id: 1, src: 'image-2.webp' },
-    { id: 2, src: 'image-3.webp' },
+    { id: 0, src: 'image-1.webp', featured: true },
+    { id: 1, src: 'image-2.webp', featured: false },
+    { id: 2, src: 'image-3.webp', featured: false },
   ]);
+
   const [selectedImageCount, setSelectedImageCount] = useState(0);
-  const [isSelected, setIsSelected] = useState(true);
 
   const dragStart = (e, position) => {
     dragItem.current = position;
-    // console.log(e.target.innerHTML);
   };
 
   const dragEnter = (e, position) => {
     dragOverItem.current = position;
-    // console.log(e.target.innerHTML);
   };
 
   const drop = () => {
-    const copyGalleryItems = [...gallery];
-    const dragItemContent = copyGalleryItems[dragItem.current];
+    if (dragItem.current === null || dragOverItem.current === null) return;
 
-    copyGalleryItems.splice(dragItem.current, 1);
-    copyGalleryItems.splice(dragOverItem.current, 0, dragItemContent);
+    const copyListItems = [...gallery];
+    const dragItemContent = copyListItems[dragItem.current];
+    const dragOverItemContent = copyListItems[dragOverItem.current];
+
+    if (dragOverItemContent.featured) {
+      copyListItems[dragItem.current] = {
+        ...dragOverItemContent,
+        featured: true,
+      };
+
+      copyListItems[dragOverItem.current] = {
+        ...dragItemContent,
+        featured: false,
+      };
+    } else {
+      copyListItems[dragItem.current] = { ...dragOverItemContent };
+      copyListItems[dragOverItem.current] = { ...dragItemContent };
+    }
 
     dragItem.current = null;
     dragOverItem.current = null;
-    setGallery(copyGalleryItems);
+    setGallery(copyListItems);
   };
 
   const handleDelete = () => {
-    // setGallery(images => images.filter(image => image.id !== id));
     const updatedGallery = gallery.filter((item) => !item.checked);
+
+    if (updatedGallery.length > 0) {
+      updatedGallery[0].featured = true;
+    }
+
     setGallery(updatedGallery);
-    setIsSelected(!isSelected);
-    // console.log(id);
   };
 
   const handleSelect = (id) => {
-    // if (item[id].checked) {
-    //   setSelectedImageCount(prevCount => {
-    //     return prevCount + 1;
-    //   });
-    // }
-    // console.log(selectedImageCount);
     const updatedGallery = gallery.map((item) => {
       if (item.id === id) {
         item.checked = !item.checked;
       }
       return item;
     });
+
     setGallery(updatedGallery);
-    setIsSelected(!isSelected);
   };
 
   useEffect(() => {
@@ -72,7 +83,7 @@ export default function App() {
       <div>
         <span>{selectedImageCount} images selected</span>
         <button
-          disabled={isSelected}
+          disabled={false}
           className="focus inline-block rounded bg-red-600 px-4 py-2 font-semibold uppercase tracking-wide text-white transition-colors duration-300 hover:bg-red-500 focus:bg-red-500 focus:outline-none focus:ring focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed"
           onClick={handleDelete}
         >
@@ -93,12 +104,15 @@ export default function App() {
               type="checkbox"
               value={item.id}
               className="checkbox"
-              // onChange={() => handleSelect(item, item.id)}
-              // onChange={() => console.log(item)}
               onChange={() => handleSelect(item.id)}
               checked={item.checked || false}
             />
-            <img src={item.src} alt={item.src} className="img" />
+            <img
+              src={item.src}
+              alt={item.src}
+              className={`img ${item.featured ? 'featured' : ''}`}
+              draggable={item.featured}
+            />
           </div>
         ))}
       </div>
